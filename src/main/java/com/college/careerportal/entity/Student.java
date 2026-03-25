@@ -16,6 +16,7 @@ public class Student {
     private String role;
     private String branch;
     private String resumePath;
+    private Integer  year;
 
     // Getters and Setters
 
@@ -74,4 +75,12 @@ public class Student {
     public void setResumePath(String resumePath) {
         this.resumePath = resumePath;
     }
+
+	public Integer getYear() {
+		return year;
+	}
+
+	public void setYear(Integer year) {
+		this.year = year;
+	}
 }

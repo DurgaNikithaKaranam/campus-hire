@@ -11,12 +11,23 @@ public class StudentService {
     @Autowired
     private StudentRepository repo;
 
-    public Student registerStudent(Student student) {
-        return repo.save(student);
-    }
-    
     public List<Student> getAllStudents() {
         return repo.findAll();
+    }
+    
+    public String registerStudent(Student student) {
+
+        // check email already exists
+        Student existing = repo.findByEmail(student.getEmail());
+
+        if (existing != null) {
+            return "EXISTS";
+        }
+
+        student.setRole("student");  // 🔥 important
+        repo.save(student);
+
+        return "SUCCESS";
     }
     
     public Student login(String email, String password) {

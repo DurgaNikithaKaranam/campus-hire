@@ -20,4 +20,27 @@ public class OpportunityService {
     public List<Opportunity> getAllOpportunities() {
         return repo.findAll();
     }
+    
+    public List<Opportunity> getByType(String type) {
+        return repo.findByType(type);
+    }
+    
+    public Opportunity getById(int id) {
+        return repo.findById(id).orElse(null);
+    }
+    
+    public void deleteOpportunity(int id) {
+        repo.deleteById(id);
+    }
+    public List<Opportunity> filter(String type) {
+        return repo.findByType(type);
+    }
+    public List<Opportunity> getFilteredJobs(int studentYear) {
+
+        return repo.findByYear(studentYear);
+    }
+
+    public List<Opportunity> getAll() {
+        return repo.findAll();
+    }
 }

@@ -14,8 +14,8 @@ public class Opportunity {
     private String companyName;
     private String branch;
     private String description;
-    private String applyType; // INTERNAL or EXTERNAL
     private String applyLink; // only for EXTERNAL
+    private Integer year;
 
     // Getters and Setters
 
@@ -36,17 +36,20 @@ public class Opportunity {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-	public String getApplyType() {
-		return applyType;
-	}
-	public void setApplyType(String applyType) {
-		this.applyType = applyType;
-	}
+	
 	public String getApplyLink() {
 		return applyLink;
 	}
 	public void setApplyLink(String applyLink) {
 		this.applyLink = applyLink;
+	}
+
+	public Integer getYear() {
+	    return year;
+	}
+
+	public void setYear(Integer year) {
+	    this.year = year;
 	}
 	
 	

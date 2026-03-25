@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Opportunities</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        /* Header */
+        .header-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Filter */
+        .filter-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Card */
+        .job-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0px 3px 8px rgba(0,0,0,0.1);
+        }
+
+        .job-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .company {
+            color: #555;
+        }
+
+        .badge-type {
+            background: #e3f2fd;
+            color: #0d6efd;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .btn-custom {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{navbar :: navbar}"></div>
+
+<div class="container">
+
+    <!-- 🔥 TITLE -->
+    <h2 class="header-title">💼 Available Opportunities</h2>
+	
+	<div th:if="${session.userRole == 'admin'}" class="mb-3">
+    <a href="/opportunity/add" class="btn btn-success">
+        ➕ Add Job
+    </a>
+</div>
+
+    <!-- 🔥 FILTER -->
+    <form action="/opportunity/filter" method="get" class="filter-box">
+        <select name="type" class="form-select w-25">
+            <option value="ALL">All</option>
+            <option value="JOB">Job</option>
+            <option value="INTERNSHIP">Internship</option>
+        </select>
+
+        <button class="btn btn-primary">Filter</button>
+    </form>
+
+    <!-- 🔥 JOB LIST -->
+    <div th:each="op : ${list}" class="job-card">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <!-- LEFT -->
+            <div>
+                <div class="job-title" th:text="${op.title}"></div>
+                <div class="company" th:text="${op.companyName}"></div>
+
+                <span class="badge-type mt-1 d-inline-block" th:text="${op.type}"></span>
+            </div>
+
+            <div>
+
+    <!-- 👨‍🎓 STUDENT -->
+    <td>
+
+    <!-- ✅ IF NOT APPLIED -->
+    <a th:if="${session.userRole == 'student' and !appliedMap[op.id]}"
+       th:href="@{/application/apply(opportunityId=${op.id})}"
+       class="btn btn-primary"
+       th:attr="data-link=${op.applyLink}"
+       onclick="openLink(event, this)">
+       Apply
+    </a>
+
+    <!-- ✅ IF ALREADY APPLIED -->
+    <span th:if="${session.userRole == 'student' and appliedMap[op.id]}"
+          class="badge bg-success">
+        ✔ Applied
+    </span>
+
+</td>
+
+    <!-- 👨‍💼 ADMIN -->
+    <a th:if="${session.userRole == 'admin'}"
+       th:href="@{/opportunity/delete(id=${op.id})}"
+       class="btn btn-danger">
+        Delete
+    </a>
+
+</div>
+
+        </div>
+
+    </div>
+
+</div>
+<script>
+function openLink(event, element) {
+    event.preventDefault();
+
+    // get link from data attribute
+    let link = element.getAttribute("data-link");
+
+    // open external site
+    window.open(link, '_blank');
+
+    // continue to backend (save application)
+    window.location.href = element.href;
+}
+</script>
+</body>
+</html>
