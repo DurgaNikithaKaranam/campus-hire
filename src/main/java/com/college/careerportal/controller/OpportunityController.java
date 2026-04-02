@@ -1,5 +1,6 @@
 package com.college.careerportal.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import com.college.careerportal.service.ApplicationService;
 import com.college.careerportal.service.OpportunityService;
 
 import jakarta.servlet.http.HttpSession;
+import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/opportunity")
@@ -53,65 +55,159 @@ public class OpportunityController {
     @GetMapping("/view")
     public String viewJobs(HttpSession session, Model model) {
 
-        int studentId = (int) session.getAttribute("userId");
+        Integer studentId = (Integer) session.getAttribute("userId");
+        String role = (String) session.getAttribute("userRole");
+        if (studentId == null && "student".equals(role)) {
+            return "redirect:/login";
+        }
 
-        Student student = studentRepository.findById(studentId).orElse(null);
+        Student student = null;
 
+        if ("student".equals(role) && studentId != null) {
+            student = studentRepository.findById(studentId).orElse(null);
+        }
+        
         List<Opportunity> list;
 
-        if ("admin".equals(session.getAttribute("userRole"))) {
-            // admin sees all jobs
+        // 👨‍💼 ADMIN → see all jobs
+        if ("admin".equals(role)) {
             list = service.getAll();
         } else {
-        	if (student.getYear() != null) {
-        	    list = service.getFilteredJobs(student.getYear());
-        	} else {
-        	    list = service.getAll();
-        	}
-        }
-        model.addAttribute("list", list);
-        
-        Integer sId = (Integer) session.getAttribute("userId");
 
-        Map<Integer, Boolean> appliedMap = new HashMap<>();
+        	if ("student".equals(role) && studentId != null) {
+                student = studentRepository.findById(studentId).orElse(null);
+            }
+            
+            List<Opportunity> all = service.getAll();
+            list = new ArrayList<>();
 
-        if (sId != null) {
-            for (Opportunity op : list) {
-                boolean applied = applicationService.alreadyApplied(sId, op.getId());
-                appliedMap.put(op.getId(), applied);
+            for (Opportunity op : all) {
+
+                if (student != null && op.getBranches() != null && op.getYears() != null) {
+
+                    String studentBranch = student.getBranch().toUpperCase();
+                    String studentYear = String.valueOf(student.getYear());
+
+                    boolean branchMatch = false;
+                    boolean yearMatch = false;
+
+                    // 🔥 BRANCH CHECK
+                    for (String b : op.getBranches().split(",")) {
+                        if (b.trim().equalsIgnoreCase(studentBranch)) {
+                            branchMatch = true;
+                            break;
+                        }
+                    }
+
+                    // 🔥 YEAR CHECK
+                    for (String y : op.getYears().split(",")) {
+                        if (y.trim().equals(studentYear)) {
+                            yearMatch = true;
+                            break;
+                        }
+                    }
+
+                    if (branchMatch && yearMatch) {
+                        list.add(op);
+                    }
+                }
             }
         }
 
-        model.addAttribute("appliedMap", appliedMap);
-        return "opportunities";
-    }
-    
-    @GetMapping("/filter")
-    public String filter(@RequestParam String type, Model model, HttpSession session) {
-
-        List<Opportunity> list;
-
-        if ("ALL".equals(type)) {
-            list = service.getAllOpportunities();
-        } else {
-            list = service.filter(type);
-        }
-
-        model.addAttribute("list", list);
-
-        // 🔥 role
-        String role = (String) session.getAttribute("userRole");
-        model.addAttribute("role", role);
-
-        // 🔥 appliedMap
-        Integer studentId = (Integer) session.getAttribute("userId");
-
+        // 🔥 appliedMap logic (same as yours)
         Map<Integer, Boolean> appliedMap = new HashMap<>();
 
         if (studentId != null) {
             for (Opportunity op : list) {
                 boolean applied = applicationService.alreadyApplied(studentId, op.getId());
                 appliedMap.put(op.getId(), applied);
+            }
+        }
+
+        model.addAttribute("appliedMap", appliedMap);
+        model.addAttribute("list", list);
+
+        return "opportunities";
+    }
+
+ 
+    
+    @GetMapping("/filter")
+    public String filter(@RequestParam String type, Model model, HttpSession session) {
+
+        String role = (String) session.getAttribute("userRole");
+
+        // 🔥 Step 1: Type filter
+        List<Opportunity> filtered;
+
+        if ("ALL".equalsIgnoreCase(type)) {
+            filtered = service.getAll();
+        } else {
+            filtered = service.filterByType(type);
+        }
+
+        List<Opportunity> list = new ArrayList<>();
+
+        // 👨‍💼 ADMIN → no further filtering
+        if ("admin".equals(role)) {
+            list = filtered;
+        }
+
+        // 👨‍🎓 STUDENT → apply branch/year filter
+        else {
+
+            Integer studentId = (Integer) session.getAttribute("userId");
+            Student student = studentRepository.findById(studentId).orElse(null);
+
+            if (student != null) {
+
+                String studentBranch = student.getBranch().toUpperCase();
+                String studentYear = String.valueOf(student.getYear());
+
+                for (Opportunity op : filtered) {
+
+                    if (op.getBranches() != null && op.getYears() != null) {
+
+                        boolean branchMatch = false;
+                        boolean yearMatch = false;
+
+                        // 🔥 branch check
+                        for (String b : op.getBranches().split(",")) {
+                            if (b.trim().equalsIgnoreCase(studentBranch)) {
+                                branchMatch = true;
+                                break;
+                            }
+                        }
+
+                        // 🔥 year check
+                        for (String y : op.getYears().split(",")) {
+                            if (y.trim().equals(studentYear)) {
+                                yearMatch = true;
+                                break;
+                            }
+                        }
+
+                        if (branchMatch && yearMatch) {
+                            list.add(op);
+                        }
+                    }
+                }
+            }
+        }
+
+        model.addAttribute("list", list);
+
+        // 🔥 appliedMap (only for students)
+        Map<Integer, Boolean> appliedMap = new HashMap<>();
+
+        if ("student".equals(role)) {
+            Integer sId = (Integer) session.getAttribute("userId");
+
+            if (sId != null) {
+                for (Opportunity op : list) {
+                    boolean applied = applicationService.alreadyApplied(sId, op.getId());
+                    appliedMap.put(op.getId(), applied);
+                }
             }
         }
 

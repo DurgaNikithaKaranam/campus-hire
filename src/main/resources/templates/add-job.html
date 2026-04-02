@@ -11,25 +11,47 @@
 
 <form action="/admin/add-job" method="post">
 
-    <input type="text" name="title" placeholder="Title" class="form-control mb-2" required>
+    <input type="text" name="title" placeholder="Title"
+           class="form-control mb-2" required>
 
-    <input type="text" name="companyName" placeholder="Company" class="form-control mb-2" required>
+    <input type="text" name="companyName" placeholder="Company"
+           class="form-control mb-2" required>
 
     <select name="type" class="form-control mb-2">
         <option value="JOB">Job</option>
         <option value="INTERNSHIP">Internship</option>
     </select>
 
-    <input type="text" name="applyLink" placeholder="Apply Link" class="form-control mb-2">
+    <input type="text" name="applyLink" placeholder="Apply Link"
+           class="form-control mb-2" required>
 
-    <select name="year" class="form-control mb-2" required>
-        <option value="2">2nd Year</option>
-        <option value="3">3rd Year</option>
-        <option value="4">4th Year</option>
-    </select>
-    <input type="text" name="branch" placeholder="Branch" class="form-control mb-2" required>
+    <!-- 🔥 MULTIPLE YEARS -->
+    <label>Select Years:</label><br>
 
-	<input type="text" name="description" placeholder="Description" class="form-control mb-2" required>
+    <input type="checkbox" name="years" value="2"> 2nd Year
+    <input type="checkbox" name="years" value="3"> 3rd Year
+    <input type="checkbox" name="years" value="4"> 4th Year
+
+    <br><br>
+
+    <!-- 🔥 MULTIPLE BRANCHES -->
+    <label>Select Branches:</label><br>
+
+    <input type="checkbox" name="branches" value="CSE"> CSE
+    <input type="checkbox" name="branches" value="ECE"> ECE
+    <input type="checkbox" name="branches" value="IT"> IT
+    <input type="checkbox" name="branches" value="EEE"> EEE
+    <input type="checkbox" name="branches" value="MECH"> MECH
+	<input type="checkbox" name="branches" value="AIML"> AIML
+	<input type="checkbox" name="branches" value="AIDS"> AIDS
+    <br><br>
+	
+	<div class="mb-3">
+    <label class="form-label">Deadline</label>
+    <input type="date" name="deadline" class="form-control" required>
+</div>
+    <input type="text" name="description" placeholder="Description"
+           class="form-control mb-2" required>
 
     <button type="submit" class="btn btn-success">Add Job</button>
 

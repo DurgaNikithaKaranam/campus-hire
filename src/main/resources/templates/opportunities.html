@@ -70,7 +70,7 @@
     <h2 class="header-title">💼 Available Opportunities</h2>
 	
 	<div th:if="${session.userRole == 'admin'}" class="mb-3">
-    <a href="/opportunity/add" class="btn btn-success">
+    <a href="/admin/addPage" class="btn btn-success">
         ➕ Add Job
     </a>
 </div>
@@ -99,26 +99,28 @@
                 <span class="badge-type mt-1 d-inline-block" th:text="${op.type}"></span>
             </div>
 
-            <div>
+        <div>
 
     <!-- 👨‍🎓 STUDENT -->
     <td>
 
     <!-- ✅ IF NOT APPLIED -->
-    <a th:if="${session.userRole == 'student' and !appliedMap[op.id]}"
-       th:href="@{/application/apply(opportunityId=${op.id})}"
-       class="btn btn-primary"
-       th:attr="data-link=${op.applyLink}"
-       onclick="openLink(event, this)">
-       Apply
-    </a>
+    <!-- Apply button -->
+<a th:if="${session.userRole == 'student' and !appliedMap[op.id]}"
+   th:href="@{/application/apply(opportunityId=${op.id})}"
+   class="btn btn-primary"
+   th:attr="data-link=${op.applyLink}"
+   onclick="openLink(event, this)">
+   Apply
+</a>
 
-    <!-- ✅ IF ALREADY APPLIED -->
-    <span th:if="${session.userRole == 'student' and appliedMap[op.id]}"
-          class="badge bg-success">
-        ✔ Applied
-    </span>
-
+<!-- Applied -->
+<span th:if="${session.userRole == 'student' and appliedMap[op.id]}"
+      class="badge bg-success">
+    ✔ Applied
+</span>
+    <b>Deadline:</b>
+    <span th:text="${op.deadline}"></span>
 </td>
 
     <!-- 👨‍💼 ADMIN -->

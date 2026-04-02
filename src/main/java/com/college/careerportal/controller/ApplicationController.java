@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import com.college.careerportal.entity.Application;
 import com.college.careerportal.entity.Opportunity;
+import com.college.careerportal.repository.StudentRepository;
 import com.college.careerportal.service.ApplicationService;
 import com.college.careerportal.service.OpportunityService;
+import com.college.careerportal.service.StudentService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -26,6 +28,8 @@ public class ApplicationController {
     private OpportunityService opportunityService;
     @Autowired
     private ApplicationService applicationService;
+    @Autowired
+    private StudentRepository studentRepository;
     
     // Student applies
     @GetMapping("/apply")
@@ -69,15 +73,10 @@ public class ApplicationController {
         int studentId = (int) session.getAttribute("userId");
 
         model.addAttribute("details", service.getApplicationDetails(studentId));
+        
 
         return "myapplications";
     }  
     
-    @GetMapping("/admin")
-    public String adminView(Model model) {
-
-        model.addAttribute("list", service.getAdminApplicationDetails());
-
-        return "admin-applications";
-    }
+    
 }

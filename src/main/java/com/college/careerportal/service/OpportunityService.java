@@ -32,13 +32,11 @@ public class OpportunityService {
     public void deleteOpportunity(int id) {
         repo.deleteById(id);
     }
-    public List<Opportunity> filter(String type) {
-        return repo.findByType(type);
+    
+    public List<Opportunity> filterByType(String type) {
+        return repo.findByTypeIgnoreCase(type);
     }
-    public List<Opportunity> getFilteredJobs(int studentYear) {
-
-        return repo.findByYear(studentYear);
-    }
+    
 
     public List<Opportunity> getAll() {
         return repo.findAll();

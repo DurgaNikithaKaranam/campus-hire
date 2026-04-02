@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<div class="container mt-5">
+
+    <div class="card shadow p-4">
+
+        <h3 class="mb-4">👤 Profile</h3>
+		
+		<p><strong>Name:</strong> <span th:text="${student.name}"></span></p>
+
+<p><strong>Email:</strong> <span th:text="${student.email}"></span></p>
+
+<!-- 👨‍🎓 Only for STUDENT -->
+<p th:if="${session.userRole == 'student'}">
+    <strong>Branch:</strong> <span th:text="${student.branch}"></span>
+</p>
+
+<p th:if="${session.userRole == 'student'}">
+    <strong>Year:</strong> <span th:text="${student.year}"></span>
+</p>
+
+<p th:if="${session.userRole == 'student'}">
+    <strong>Resume:</strong>
+    <a th:href="@{'/uploads/' + ${student.resumePath}}"
+       target="_blank"
+       class="btn btn-outline-primary btn-sm">
+       View Resume
+    </a>
+</p>
+
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

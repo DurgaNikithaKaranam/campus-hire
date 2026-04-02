@@ -33,4 +33,8 @@ public class StudentService {
     public Student login(String email, String password) {
         return repo.findByEmailAndPassword(email, password);
     }
+    
+    public Student getById(int id) {
+        return repo.findById(id).orElse(null);
+    }
 }

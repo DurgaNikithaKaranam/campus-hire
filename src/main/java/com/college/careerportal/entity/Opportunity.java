@@ -1,5 +1,5 @@
 package com.college.careerportal.entity;
-
+import java.time.LocalDate;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,10 +12,11 @@ public class Opportunity {
     private String title;
     private String type; // JOB or INTERNSHIP
     private String companyName;
-    private String branch;
     private String description;
     private String applyLink; // only for EXTERNAL
-    private Integer year;
+    private String branches;   // Example: "CSE,ECE,IT"
+    private String years;      // Example: "2,3,4"
+    private LocalDate deadline;
 
     // Getters and Setters
 
@@ -31,9 +32,7 @@ public class Opportunity {
     public String getCompanyName() { return companyName; }
     public void setCompanyName(String companyName) { this.companyName = companyName; }
 
-    public String getBranch() { return branch; }
-    public void setBranch(String branch) { this.branch = branch; }
-
+    
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 	
@@ -43,14 +42,26 @@ public class Opportunity {
 	public void setApplyLink(String applyLink) {
 		this.applyLink = applyLink;
 	}
-
-	public Integer getYear() {
-	    return year;
+	public String getBranches() {
+		return branches;
+	}
+	public void setBranches(String branches) {
+		this.branches = branches;
+	}
+	public String getYears() {
+		return years;
+	}
+	public void setYears(String years) {
+		this.years = years;
+	}
+	public LocalDate getDeadline() {
+		return deadline;
+	}
+	public void setDeadline(LocalDate deadline) {
+		this.deadline = deadline;
 	}
 
-	public void setYear(Integer year) {
-	    this.year = year;
-	}
+	
 	
 	
 }

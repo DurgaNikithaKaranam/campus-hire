@@ -111,8 +111,21 @@ public class StudentController {
         return "dashboard";
     }
     
-    @GetMapping("/logout")
-    public String logout() {
-        return "redirect:/student/login";
+    @GetMapping("/profile")
+    public String profile(HttpSession session, Model model) {
+
+        Integer id = (Integer) session.getAttribute("userId");
+
+        if (id == null) {
+            return "redirect:/student/login";
+        }
+
+        Student student = service.getById(id);
+
+        model.addAttribute("student", student);
+
+        return "profile";
     }
+    
+    
 }

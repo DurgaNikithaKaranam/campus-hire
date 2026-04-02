@@ -22,7 +22,10 @@ public class ApplicationService {
     @Autowired
     private StudentRepository studentRepository;
     
-
+    public List<Object[]> getApplicationsByCompanyAndBranch() {
+        return repo.countApplicationsByCompanyAndBranch();
+    }
+    
     public String apply(Application app) {
 
     	try {
