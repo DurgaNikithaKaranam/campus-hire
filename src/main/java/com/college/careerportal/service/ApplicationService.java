@@ -111,4 +111,8 @@ public class ApplicationService {
 
         return details;
     }
+    
+    public List<Application> getByStudentId(int studentId) {
+        return repo.findByStudentId(studentId);
+    }
 }

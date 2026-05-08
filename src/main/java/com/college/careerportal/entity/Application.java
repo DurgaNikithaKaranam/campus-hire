@@ -1,18 +1,28 @@
 package com.college.careerportal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 
 @Entity
 public class Application {
-
-    @Id
+	
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private int studentId;
-    private int opportunityId;
-    private String status; // APPLIED / APPROVED / REJECTED
 
+    // ✅ FIX HERE
+    @Column(name = "opportunity_id")
+    private int opportunityId;
+
+    private String status;
+
+    // ✅ relation mapping
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "opportunity_id", insertable = false, updatable = false)
+    private Opportunity opportunity;
     // Getters and Setters
 
     public int getId() { return id; }

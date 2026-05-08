@@ -9,6 +9,7 @@ import java.util.List;
 public interface ApplicationRepository extends JpaRepository<Application, Integer> {
 	List<Application> findByStudentId(int studentId);
 	Application findByStudentIdAndOpportunityId(int studentId, int opportunityId);
+	void deleteByOpportunityId(int opportunityId);
 	
 	@Query("""
 			SELECT o.companyName, s.branch, COUNT(a)

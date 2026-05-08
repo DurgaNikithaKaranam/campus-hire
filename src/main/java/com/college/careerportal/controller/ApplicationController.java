@@ -14,11 +14,8 @@ import com.college.careerportal.service.ApplicationService;
 import com.college.careerportal.service.OpportunityService;
 import com.college.careerportal.service.StudentService;
 
-import jakarta.servlet.http.HttpSession;
 
-import org.springframework.ui.Model;
-
-@Controller
+@RestController
 @RequestMapping("/application")
 public class ApplicationController {
 
@@ -31,14 +28,13 @@ public class ApplicationController {
     @Autowired
     private StudentRepository studentRepository;
     
-    // Student applies
-    @GetMapping("/apply")
-    public String apply(@RequestParam int opportunityId, HttpSession session) {
 
-        Integer studentId = (Integer) session.getAttribute("userId");
+    @PostMapping("/apply")
+    public String apply(@RequestParam int opportunityId,
+                        @RequestParam int studentId) {
 
         if (applicationService.alreadyApplied(studentId, opportunityId)) {
-            return "redirect:/opportunity/view";  // ❌ block duplicate
+            return "Already Applied";
         }
 
         Application app = new Application();
@@ -46,11 +42,11 @@ public class ApplicationController {
         app.setOpportunityId(opportunityId);
         app.setStatus("APPLIED");
 
-        service.apply(app);
+        applicationService.apply(app);
 
-        return "redirect:/opportunity/view";
+        return "Applied Successfully";
     }
-
+    
     // View all applications (Admin)
     @GetMapping("/all")
     @ResponseBody 
@@ -58,25 +54,34 @@ public class ApplicationController {
         return service.getAllApplications();
     }
     
-//    @GetMapping("/updateStatus") 
-//    public String updateStatus(@RequestParam int id,
-//                               @RequestParam String status) {
-//
-//        service.updateStatus(id, status);
-//
-//        return "redirect:/application/admin";
-//    }
+    @PutMapping("/updateStatus")
+    public String updateStatus(@RequestParam int id,
+                               @RequestParam String status) {
+
+        service.updateStatus(id, status);
+        return "updated";
+    }
+ 
     
-    @GetMapping("/my")
-    public String myApplications(HttpSession session, Model model) {
+    @GetMapping("/myIds")
+    @ResponseBody
+    public List<Integer> getMyAppliedIds(@RequestParam int studentId) {
 
-        int studentId = (int) session.getAttribute("userId");
+        List<Application> apps = applicationService.getByStudent(studentId);
 
-        model.addAttribute("details", service.getApplicationDetails(studentId));
-        
+        List<Integer> ids = new ArrayList<>();
 
-        return "myapplications";
-    }  
+        for (Application app : apps) {
+            ids.add(app.getOpportunityId());
+        }
+
+        return ids;
+    }
     
+    @GetMapping("/api/my/{studentId}")
+    @ResponseBody
+    public List<Application> getMyApplications(@PathVariable int studentId) {
+        return applicationService.getByStudentId(studentId);
+    }
     
 }

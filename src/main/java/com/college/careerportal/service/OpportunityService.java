@@ -5,13 +5,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.college.careerportal.entity.Opportunity;
+import com.college.careerportal.repository.ApplicationRepository;
 import com.college.careerportal.repository.OpportunityRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class OpportunityService {
 
     @Autowired
     private OpportunityRepository repo;
+    
+    @Autowired
+    private ApplicationRepository applicationRepo;
 
     public Opportunity addOpportunity(Opportunity op) {
         return repo.save(op);
@@ -29,7 +35,13 @@ public class OpportunityService {
         return repo.findById(id).orElse(null);
     }
     
+    @Transactional
     public void deleteOpportunity(int id) {
+
+        // 🔥 delete child records first
+        applicationRepo.deleteByOpportunityId(id);
+
+        // 🔥 then delete parent
         repo.deleteById(id);
     }
     

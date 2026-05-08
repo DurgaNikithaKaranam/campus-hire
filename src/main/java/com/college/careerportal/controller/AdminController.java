@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.ui.Model;
+//import org.springframework.ui.Model;
 
 import com.college.careerportal.entity.Opportunity;
 import com.college.careerportal.entity.Student;
@@ -16,11 +16,12 @@ import com.college.careerportal.entity.Application;
 import com.college.careerportal.repository.StudentRepository;
 import com.college.careerportal.service.OpportunityService;
 import com.college.careerportal.service.ApplicationService;
+import com.college.careerportal.service.MailService;
 import com.college.careerportal.service.StudentService;
+//
+//import jakarta.servlet.http.HttpSession;
 
-import jakarta.servlet.http.HttpSession;
-
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
 
@@ -34,52 +35,9 @@ public class AdminController {
 
     @Autowired
     private OpportunityService opportunityService;
-
-
-    // Open login page
-    @GetMapping("/login")
-    public String loginPage() {
-        return "admin-login";
-    }
-
-    // Handle login
-    @PostMapping("/login")
-    public String login(@RequestParam String email,
-                        @RequestParam String password,
-                        HttpSession session,
-                        Model model) {
-
-        Student admin = service.login(email, password);
-
-        if (admin != null && "admin".equals(admin.getRole())) {
-            session.setAttribute("userRole", "admin");   // 🔥 IMPORTANT
-            return "admin-dashboard";
-        }
-
-        model.addAttribute("error", "Invalid admin credentials");
-        return "admin-login";
-    }
-
-    // Dashboard
-    @GetMapping("/dashboard")
-    public String adminDashboard(HttpSession session, Model model) {
-
-        if (session.getAttribute("userId") == null) {
-            return "redirect:/student/login";
-        }
-
-        // 🔥 dummy values (we will make dynamic later)
-        model.addAttribute("jobCount", 10);
-        model.addAttribute("applicationCount", 20);
-        model.addAttribute("studentCount", 5);
-
-        return "admin-dashboard";
-    }
     
-    @GetMapping("/addPage")
-    public String showAddPage() {
-        return "add-job";
-    }
+    @Autowired
+    private MailService mailService;
 
     @PostMapping("/add-job")
     public String addJob(@RequestParam String title,
@@ -87,53 +45,72 @@ public class AdminController {
                          @RequestParam String type,
                          @RequestParam List<String> branches,
                          @RequestParam String description,
-                         @RequestParam(required = false) String applyLink, 
-                         @RequestParam List<String>  years,
-                         @RequestParam LocalDate deadline){
+                         @RequestParam(required = false) String applyLink,
+                         @RequestParam List<String> years,
+                         @RequestParam String deadline) {
 
         Opportunity op = new Opportunity();
         op.setTitle(title);
         op.setCompanyName(companyName);
-        op.setType(type.toUpperCase()); // 🔥 normalize
+        op.setType(type.toUpperCase());
         op.setDescription(description);
         op.setApplyLink(applyLink);
         op.setBranches(String.join(",", branches));
         op.setYears(String.join(",", years));
-        op.setDeadline(deadline);
+        op.setDeadline(LocalDate.parse(deadline));
 
         opportunityService.addOpportunity(op);
 
-        return "redirect:/opportunity/view";
-    }
-    
-    @GetMapping("/applications")
-    public String viewApplications(Model model) {
+        // 🔥 CONVERT DATA
+        List<String> branchList = branches.stream()
+                .map(String::toUpperCase)
+                .toList();
 
-        List<Application> applications = applicationService.getAllApplications();
-        model.addAttribute("applications", applications);
+        List<Integer> yearList = years.stream()
+                .map(Integer::parseInt)
+                .toList();
 
-        model.addAttribute("totalApplications", applications.size());
-        model.addAttribute("totalStudents", studentRepository.count());
-        model.addAttribute("totalJobs", opportunityService.getAll().size());
+        // 🔥 GET ELIGIBLE STUDENTS
+        List<Student> students = studentRepository.findEligibleStudents(branchList, yearList);
 
-        List<Object[]> companyBranchData = applicationService.getApplicationsByCompanyAndBranch();
-        model.addAttribute("companyBranchData", companyBranchData);
-        
-        Map<String, Map<String, Long>> groupedData = new HashMap<>();
+        // 🔥 SEND MAILS
+        for (Student s : students) {
 
-        for (Object[] row : companyBranchData) {
-            String company = (String) row[0];
-            String branch = (String) row[1];
-            Long count = (Long) row[2];
+        	String message =
+        		    "A new job opportunity has been posted on Career Portal.\n\n" +
+        		    "Company: " + companyName + "\n" +
+        		    "Role: " + title + "\n" +
+        		    "Deadline: " + deadline + "\n\n" +
+        		    "Login to your account to apply.\n\n" +
+        		    "Regards,\nCareer Portal Team";
 
-            groupedData
-                .computeIfAbsent(company, k -> new HashMap<>())
-                .put(branch, count);
+            mailService.sendMail(
+                    s.getEmail(),
+                    "New Job Opportunity - " + companyName,
+                    message
+            );
         }
 
-        model.addAttribute("groupedData", groupedData);
+        return "success";
+    }
+    
 
-        return "admin-applications";
+    @GetMapping("/api/dashboard")
+    public Map<String, Object> getDashboardData() {
+
+        Map<String, Object> data = new HashMap<>();
+
+        List<Application> applications = applicationService.getAllApplications();
+
+        data.put("totalApplications", applications.size());
+        data.put("totalStudents", studentRepository.count());
+        data.put("totalJobs", opportunityService.getAll().size());
+
+        List<Object[]> companyBranchData = applicationService.getApplicationsByCompanyAndBranch();
+
+        data.put("companyBranchData", companyBranchData);
+
+        return data;
     }
     
     
